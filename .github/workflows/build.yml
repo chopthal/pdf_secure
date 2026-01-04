@@ -1,0 +1,70 @@
+name: Build macOS Executable
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    
+    - name: Build executable
+      run: |
+        pyinstaller --onefile --windowed --name="PDF보안처리" --clean pdf_secure.py
+    
+    - name: Create release archive
+      run: |
+        cd dist
+        zip -r PDF보안처리-macOS.zip PDF보안처리
+        cd ..
+    
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: PDF보안처리-macOS
+        path: |
+          dist/PDF보안처리
+          dist/PDF보안처리-macOS.zip
+    
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: dist/PDF보안처리-macOS.zip
+        name: Release ${{ github.ref_name }}
+        body: |
+          ## PDF 보안 처리 시스템 ${{ github.ref_name }}
+          
+          ### 다운로드
+          - **PDF보안처리-macOS.zip**: 실행 파일 (압축)
+          
+          ### 사용 방법
+          1. ZIP 파일 다운로드 및 압축 해제
+          2. `PDF보안처리` 파일 더블클릭하여 실행
+          3. Gatekeeper 경고가 나타나면 "확인" 클릭
+          4. 시스템 설정 > 보안 및 개인 정보 보호에서 허용
+          
+          ### 시스템 요구사항
+          - macOS 10.14 이상
+          - Python 설치 불필요
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
