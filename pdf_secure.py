@@ -150,6 +150,39 @@ def add_watermark(input_pdf, output_pdf, watermark_text, password=None,
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 import threading
+import sys
+import os
+
+# macOS에서 발생하는 시스템 경고 메시지 억제
+if platform.system() == 'Darwin':  # macOS
+    # Input Method Kit 관련 경고 억제를 위한 환경 변수 설정
+    os.environ.setdefault('NSUnbufferedIO', 'YES')
+    
+    # stderr 필터링을 위한 클래스 정의 (시스템 경고만 억제)
+    class StderrFilter:
+        """macOS 시스템 경고 메시지를 필터링하는 클래스"""
+        def __init__(self, original_stderr):
+            self.original_stderr = original_stderr
+            self.filter_keywords = [
+                'IMKClient',
+                'IMKInputSession',
+                'NSOpenPanel',
+                'TSM AdjustCapsLockLED',
+                'mach port for IMKCFRunLoopWakeUpReliable'
+            ]
+        
+        def write(self, message):
+            # 필터링할 키워드가 포함된 메시지는 무시
+            if any(keyword in message for keyword in self.filter_keywords):
+                return
+            # 실제 에러는 그대로 출력
+            self.original_stderr.write(message)
+        
+        def flush(self):
+            self.original_stderr.flush()
+    
+    # stderr를 필터링된 버전으로 교체
+    sys.stderr = StderrFilter(sys.stderr)
 
 class PDFSecureGUI:
     def __init__(self, root):
