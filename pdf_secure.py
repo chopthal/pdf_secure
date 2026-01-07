@@ -188,7 +188,7 @@ class PDFSecureGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("PDF 보안 처리 시스템")
-        self.root.geometry("500x520")
+        self.root.geometry("650x680")
         self.root.resizable(False, False)
         
         # 변수 초기화
@@ -204,60 +204,60 @@ class PDFSecureGUI:
     def setup_ui(self):
         # 제목
         title_label = tk.Label(self.root, text="PDF 보안 처리 시스템", 
-                              font=("맑은 고딕", 16, "bold"))
-        title_label.pack(pady=10)
+                              font=("맑은 고딕", 20, "bold"))
+        title_label.pack(pady=15)
         
         # 파일 선택 프레임
         file_frame = tk.Frame(self.root)
-        file_frame.pack(pady=10, padx=20, fill=tk.X)
+        file_frame.pack(pady=15, padx=30, fill=tk.X)
         
-        tk.Label(file_frame, text="원본 PDF 파일:", font=("맑은 고딕", 10)).pack(anchor=tk.W)
+        tk.Label(file_frame, text="원본 PDF 파일:", font=("맑은 고딕", 13)).pack(anchor=tk.W)
         
         file_select_frame = tk.Frame(file_frame)
-        file_select_frame.pack(fill=tk.X, pady=5)
+        file_select_frame.pack(fill=tk.X, pady=8)
         
         self.file_entry = tk.Entry(file_select_frame, textvariable=self.input_file, 
-                                   font=("맑은 고딕", 9), state='readonly')
-        self.file_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
+                                   font=("맑은 고딕", 11), state='readonly')
+        self.file_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
         
         tk.Button(file_select_frame, text="파일 선택", command=self.select_file,
-                 font=("맑은 고딕", 9)).pack(side=tk.LEFT)
+                 font=("맑은 고딕", 11)).pack(side=tk.LEFT)
         
         # 구매자 정보 입력 프레임
         info_frame = tk.Frame(self.root)
-        info_frame.pack(pady=10, padx=20, fill=tk.X)
+        info_frame.pack(pady=15, padx=30, fill=tk.X)
         
-        tk.Label(info_frame, text="구매자 정보", font=("맑은 고딕", 10, "bold")).pack(anchor=tk.W, pady=(0, 5))
+        tk.Label(info_frame, text="구매자 정보", font=("맑은 고딕", 13, "bold")).pack(anchor=tk.W, pady=(0, 8))
         
         # 이름 입력
         name_frame = tk.Frame(info_frame)
-        name_frame.pack(fill=tk.X, pady=5)
-        tk.Label(name_frame, text="이름:", font=("맑은 고딕", 9), width=10, anchor=tk.W).pack(side=tk.LEFT)
-        tk.Entry(name_frame, textvariable=self.buyer_name, font=("맑은 고딕", 9)).pack(side=tk.LEFT, fill=tk.X, expand=True)
+        name_frame.pack(fill=tk.X, pady=8)
+        tk.Label(name_frame, text="이름:", font=("맑은 고딕", 13), width=10, anchor=tk.W).pack(side=tk.LEFT)
+        tk.Entry(name_frame, textvariable=self.buyer_name, font=("맑은 고딕", 13)).pack(side=tk.LEFT, fill=tk.X, expand=True)
         
         # 연락처 입력
         phone_frame = tk.Frame(info_frame)
-        phone_frame.pack(fill=tk.X, pady=5)
-        tk.Label(phone_frame, text="연락처:", font=("맑은 고딕", 9), width=10, anchor=tk.W).pack(side=tk.LEFT)
-        tk.Entry(phone_frame, textvariable=self.buyer_phone, font=("맑은 고딕", 9)).pack(side=tk.LEFT, fill=tk.X, expand=True)
+        phone_frame.pack(fill=tk.X, pady=8)
+        tk.Label(phone_frame, text="연락처:", font=("맑은 고딕", 13), width=10, anchor=tk.W).pack(side=tk.LEFT)
+        tk.Entry(phone_frame, textvariable=self.buyer_phone, font=("맑은 고딕", 13)).pack(side=tk.LEFT, fill=tk.X, expand=True)
         
-        # PDF 비밀번호 입력
+        # 비밀번호 입력
         password_frame = tk.Frame(info_frame)
-        password_frame.pack(fill=tk.X, pady=5)
-        tk.Label(password_frame, text="PDF 비밀번호:", font=("맑은 고딕", 9), width=10, anchor=tk.W).pack(side=tk.LEFT)
+        password_frame.pack(fill=tk.X, pady=8)
+        tk.Label(password_frame, text="비밀번호:", font=("맑은 고딕", 13), width=10, anchor=tk.W).pack(side=tk.LEFT)
         password_entry = tk.Entry(password_frame, textvariable=self.pdf_password, 
-                                  font=("맑은 고딕", 9))
+                                  font=("맑은 고딕", 13))
         password_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
         # 미리보기 프레임
         preview_frame = tk.Frame(info_frame)
-        preview_frame.pack(fill=tk.X, pady=(10, 5))
-        tk.Label(preview_frame, text="미리보기:", font=("맑은 고딕", 9, "bold"), 
-                anchor=tk.W).pack(anchor=tk.W, pady=(0, 3))
+        preview_frame.pack(fill=tk.X, pady=(12, 8))
+        tk.Label(preview_frame, text="미리보기:", font=("맑은 고딕", 11, "bold"), 
+                anchor=tk.W).pack(anchor=tk.W, pady=(0, 5))
         self.preview_label = tk.Label(preview_frame, text="", 
-                                     font=("맑은 고딕", 9), 
+                                     font=("맑은 고딕", 11), 
                                      fg="#666666", anchor=tk.W, 
-                                     wraplength=460, justify=tk.LEFT)
+                                     wraplength=590, justify=tk.LEFT)
         self.preview_label.pack(fill=tk.X, anchor=tk.W)
         
         # 이름과 연락처 변경 시 미리보기 업데이트
@@ -266,25 +266,25 @@ class PDFSecureGUI:
         
         # 진행 상황 프레임
         progress_frame = tk.Frame(self.root)
-        progress_frame.pack(pady=10, padx=20, fill=tk.X)
+        progress_frame.pack(pady=15, padx=30, fill=tk.X)
         
         self.status_label = tk.Label(progress_frame, textvariable=self.status_var, 
-                                     font=("맑은 고딕", 9), anchor=tk.W)
-        self.status_label.pack(fill=tk.X, pady=(0, 5))
+                                     font=("맑은 고딕", 11), anchor=tk.W)
+        self.status_label.pack(fill=tk.X, pady=(0, 8))
         
         self.progress_bar = ttk.Progressbar(progress_frame, variable=self.progress_var, 
-                                           maximum=100, length=460)
+                                           maximum=100, length=590)
         self.progress_bar.pack(fill=tk.X)
         
         # 처리 버튼
         button_frame = tk.Frame(self.root)
-        button_frame.pack(pady=20)
+        button_frame.pack(pady=25)
         
         self.process_button = tk.Button(button_frame, text="처리 시작", 
                                        command=self.start_processing,
-                                       font=("맑은 고딕", 11, "bold"),
+                                       font=("맑은 고딕", 13, "bold"),
                                        bg="#4CAF50", fg="white", 
-                                       width=15, height=2)
+                                       width=18, height=2)
         self.process_button.pack()
     
     def select_file(self):
@@ -328,7 +328,7 @@ class PDFSecureGUI:
             messagebox.showerror("오류", "연락처를 입력해주세요.")
             return False
         if not self.pdf_password.get().strip():
-            messagebox.showerror("오류", "PDF 비밀번호를 입력해주세요.")
+            messagebox.showerror("오류", "비밀번호를 입력해주세요.")
             return False
         return True
     
