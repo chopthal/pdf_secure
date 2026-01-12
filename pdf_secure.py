@@ -233,21 +233,37 @@ class PDFSecureGUI:
         name_frame = tk.Frame(info_frame)
         name_frame.pack(fill=tk.X, pady=8)
         tk.Label(name_frame, text="이름:", font=("맑은 고딕", 13), width=10, anchor=tk.W).pack(side=tk.LEFT)
-        tk.Entry(name_frame, textvariable=self.buyer_name, font=("맑은 고딕", 13)).pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.name_entry = tk.Entry(name_frame, textvariable=self.buyer_name, font=("맑은 고딕", 13))
+        self.name_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        # macOS 한글 입력 문제 해결: 포커스를 잃을 때 조합 완료
+        if platform.system() == 'Darwin':
+            self.name_entry.bind('<FocusOut>', self._fix_korean_input)
+            self.name_entry.bind('<Return>', lambda e: self.phone_entry.focus())
+            self.name_entry.bind('<Tab>', lambda e: self.phone_entry.focus())
         
         # 연락처 입력
         phone_frame = tk.Frame(info_frame)
         phone_frame.pack(fill=tk.X, pady=8)
         tk.Label(phone_frame, text="연락처:", font=("맑은 고딕", 13), width=10, anchor=tk.W).pack(side=tk.LEFT)
-        tk.Entry(phone_frame, textvariable=self.buyer_phone, font=("맑은 고딕", 13)).pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.phone_entry = tk.Entry(phone_frame, textvariable=self.buyer_phone, font=("맑은 고딕", 13))
+        self.phone_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        # macOS 한글 입력 문제 해결: 포커스를 잃을 때 조합 완료
+        if platform.system() == 'Darwin':
+            self.phone_entry.bind('<FocusOut>', self._fix_korean_input)
+            self.phone_entry.bind('<Return>', lambda e: self.password_entry.focus())
+            self.phone_entry.bind('<Tab>', lambda e: self.password_entry.focus())
         
         # 비밀번호 입력
         password_frame = tk.Frame(info_frame)
         password_frame.pack(fill=tk.X, pady=8)
         tk.Label(password_frame, text="비밀번호:", font=("맑은 고딕", 13), width=10, anchor=tk.W).pack(side=tk.LEFT)
-        password_entry = tk.Entry(password_frame, textvariable=self.pdf_password, 
+        self.password_entry = tk.Entry(password_frame, textvariable=self.pdf_password, 
                                   font=("맑은 고딕", 13))
-        password_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.password_entry.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        # macOS 한글 입력 문제 해결: 포커스를 잃을 때 조합 완료
+        if platform.system() == 'Darwin':
+            self.password_entry.bind('<FocusOut>', self._fix_korean_input)
+            self.password_entry.bind('<Return>', lambda e: self.start_processing())
         
         # 미리보기 프레임
         preview_frame = tk.Frame(info_frame)
@@ -286,6 +302,24 @@ class PDFSecureGUI:
                                        bg="#4CAF50", fg="white", 
                                        width=18, height=2)
         self.process_button.pack()
+    
+    def _fix_korean_input(self, event):
+        """
+        macOS에서 한글 입력 시 포커스 이동으로 인한 문제 해결
+        포커스를 잃을 때 한글 조합을 강제로 완료시킴
+        """
+        widget = event.widget
+        # 약간의 지연을 두고 텍스트를 다시 설정하여 조합 완료
+        # macOS IME가 조합 중인 상태를 완료하도록 함
+        def complete_composition():
+            current_text = widget.get()
+            # 텍스트를 다시 설정하여 조합 완료
+            widget.delete(0, tk.END)
+            widget.insert(0, current_text)
+            # StringVar 업데이트 (이미 연결되어 있으므로 자동 반영)
+        
+        # 50ms 지연 후 실행 (IME 조합 완료 대기)
+        widget.after(50, complete_composition)
     
     def select_file(self):
         filename = filedialog.askopenfilename(
