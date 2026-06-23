@@ -38,6 +38,8 @@ class TestSettings:
             job_retention_seconds=3600,
             max_upload_bytes=100,
             default_watermark_start_page=5,
+            cleanup_interval_seconds=300,
+            cookie_secure=False,
         )
         with pytest.raises(RuntimeError, match="SUPABASE_URL"):
             settings.validate_auth_config()
@@ -52,8 +54,15 @@ class TestSettings:
             job_retention_seconds=3600,
             max_upload_bytes=100,
             default_watermark_start_page=5,
+            cleanup_interval_seconds=300,
+            cookie_secure=False,
         )
         settings.validate_auth_config()
+
+    def test_cookie_secure_from_env(self, monkeypatch):
+        monkeypatch.setenv("COOKIE_SECURE", "true")
+        settings = Settings.from_env()
+        assert settings.cookie_secure is True
 
     def test_get_settings_cached(self, monkeypatch):
         monkeypatch.setenv("AUTH_DISABLED", "1")

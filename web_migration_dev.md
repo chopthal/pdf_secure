@@ -2,7 +2,7 @@
 
 > **문서 목적**: 데스크톱(tkinter) 앱을 웹 서비스로 전환하기 위한 공동 기획 문서  
 > **작성일**: 2026-06-22  
-> **상태**: Phase 2 완료 — Phase 3(배포) 진행 대기
+> **상태**: Phase 3 코드 완료 — Railway 배포 대기 (`DEPLOY.md`)
 
 ---
 
@@ -456,13 +456,27 @@ uvicorn web.main:app --reload
 
 환경 변수 예시: `.env.example`
 
-### Phase 3 — 배포·운영 (1~2일)
+### Phase 3 — 배포·운영 (진행 중)
 
-- [ ] Dockerfile
-- [ ] Railway 배포
-- [ ] HTTPS (PaaS 기본 제공)
-- [ ] 환경 변수 문서화
-- [ ] 실제 200페이지 PDF로 E2E 테스트
+| Task | 구현 | 테스트 |
+|------|------|--------|
+| 1 | `Dockerfile`, `requirements-prod.txt` | `tests/test_deploy.py` |
+| 2 | `/health`, cleanup scheduler | `test_health.py`, `test_cleanup_scheduler.py` |
+| 3 | `railway.toml`, `DEPLOY.md` | 수동 Railway 배포 |
+| 4 | 200p PDF E2E | `pytest -m slow` |
+
+- [x] Dockerfile + `.dockerignore`
+- [x] `requirements-prod.txt` (PyInstaller 제외)
+- [x] Railway 설정 (`railway.toml`, 헬스체크)
+- [x] `/health` 엔드포인트
+- [x] 주기적 임시 파일 정리 (`CLEANUP_INTERVAL_SECONDS`)
+- [x] `COOKIE_SECURE` (HTTPS 쿠키)
+- [x] `DEPLOY.md` 환경 변수·배포 문서
+- [x] CI Docker build (`.github/workflows/docker.yml`)
+- [x] 200페이지 PDF 테스트 (`pytest -m slow`)
+- [ ] **Railway 실제 배포** (Supabase 키 설정 후)
+
+> **상태**: Phase 3 코드 완료 — Railway·Supabase 연동은 `DEPLOY.md` 따라 진행
 
 ### Phase 4 — 선택 확장 (이후)
 

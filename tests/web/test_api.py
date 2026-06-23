@@ -48,6 +48,8 @@ class TestPages:
             job_retention_seconds=3600,
             max_upload_bytes=100 * 1024 * 1024,
             default_watermark_start_page=5,
+            cleanup_interval_seconds=300,
+            cookie_secure=False,
         )
         client = TestClient(create_app(settings))
         res = client.get("/", follow_redirects=False)

@@ -69,7 +69,7 @@ $env:AUTH_DISABLED = "1"
 
 `Activate.ps1`이 막히면 위처럼 **venv 경로를 직접** 쓰면 됩니다. 브라우저: http://127.0.0.1:8000
 
-운영 시 `.env.example` 참고해 Supabase 환경 변수 설정.
+운영 시 `.env.example` · [DEPLOY.md](DEPLOY.md) 참고.
 
 ## 디렉터리
 

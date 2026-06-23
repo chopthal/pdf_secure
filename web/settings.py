@@ -31,6 +31,8 @@ class Settings:
     job_retention_seconds: int
     max_upload_bytes: int
     default_watermark_start_page: int
+    cleanup_interval_seconds: int
+    cookie_secure: bool
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -48,6 +50,8 @@ class Settings:
                     str(DEFAULT_WATERMARK_START_PAGE),
                 )
             ),
+            cleanup_interval_seconds=int(os.environ.get("CLEANUP_INTERVAL_SECONDS", "300")),
+            cookie_secure=_env_bool("COOKIE_SECURE", False),
         )
 
     def validate_auth_config(self) -> None:

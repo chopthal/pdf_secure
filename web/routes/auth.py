@@ -29,7 +29,13 @@ async def login(
 ):
     if settings.auth_disabled:
         response = RedirectResponse(url="/", status_code=303)
-        response.set_cookie("access_token", "dev-token", httponly=True, samesite="lax")
+        response.set_cookie(
+            "access_token",
+            "dev-token",
+            httponly=True,
+            samesite="lax",
+            secure=settings.cookie_secure,
+        )
         return response
 
     async with httpx.AsyncClient(timeout=30.0) as client:
@@ -56,7 +62,7 @@ async def login(
         access_token,
         httponly=True,
         samesite="lax",
-        secure=False,
+        secure=settings.cookie_secure,
     )
     return redirect
 

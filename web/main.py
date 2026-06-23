@@ -1,13 +1,15 @@
 """FastAPI 애플리케이션."""
 
+import asyncio
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from web.routes import auth, jobs, pages
+from web.routes import auth, health, jobs, pages
 from web.services.cleanup import cleanup_expired_jobs
+from web.services.cleanup_scheduler import start_cleanup_task
 from web.services.job_service import JobService
 from web.services.job_store import JobStore
 from core.config import PROJECT_ROOT
@@ -22,7 +24,16 @@ STATIC_DIR = WEB_ROOT / "static"
 async def lifespan(app: FastAPI):
     settings: Settings = app.state.settings
     settings.validate_auth_config()
+    cleanup_task = start_cleanup_task(
+        app.state.job_store, settings.cleanup_interval_seconds
+    )
     yield
+    if cleanup_task is not None:
+        cleanup_task.cancel()
+        try:
+            await cleanup_task
+        except asyncio.CancelledError:
+            pass
     cleanup_expired_jobs(app.state.job_store)
 
 
@@ -40,6 +51,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     if STATIC_DIR.is_dir():
         app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
+    app.include_router(health.router)
     app.include_router(pages.router)
     app.include_router(auth.router)
     app.include_router(jobs.router)

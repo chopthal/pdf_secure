@@ -1,0 +1,25 @@
+name: Docker Build
+
+on:
+  push:
+    branches: [master, web-phase3-deploy]
+  pull_request:
+    branches: [master, web-phase3-deploy]
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t pdf-secure:test .
+
+      - name: Smoke test container
+        run: |
+          docker run -d --name pdf-secure-smoke -p 8080:8000 \
+            -e AUTH_DISABLED=1 \
+            pdf-secure:test
+          sleep 3
+          curl -sf http://127.0.0.1:8080/health
+          docker stop pdf-secure-smoke
