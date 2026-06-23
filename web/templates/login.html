@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}로그인 — PDF 보안 처리{% endblock %}
+{% block content %}
+<section class="card">
+  <h2>로그인</h2>
+  {% if auth_disabled %}
+  <p class="hint">개발 모드: 아무 이메일/비밀번호로 로그인할 수 있습니다.</p>
+  {% endif %}
+  <form method="post" action="/auth/login" class="form">
+    <label>이메일
+      <input type="email" name="email" required autocomplete="username">
+    </label>
+    <label>비밀번호
+      <input type="password" name="password" required autocomplete="current-password">
+    </label>
+    <button type="submit" class="btn-primary">로그인</button>
+  </form>
+</section>
+{% endblock %}

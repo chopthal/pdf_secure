@@ -1,0 +1,7 @@
+Nanum Gothic (나눔고딕)
+Copyright (c) 2010, NAVER Corporation (https://www.navercorp.com/)
+
+Licensed under the SIL Open Font License, Version 1.1.
+See https://scripts.sil.org/OFL
+
+Source: https://github.com/google/fonts/tree/main/ofl/nanumgothic

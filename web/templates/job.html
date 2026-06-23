@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}진행 중 — PDF 보안 처리{% endblock %}
+{% block content %}
+<section class="card">
+  <h2>처리 진행</h2>
+  <p id="status-message">준비 중...</p>
+  <div class="progress-bar">
+    <div id="progress-fill" class="progress-fill" style="width: 0%"></div>
+  </div>
+  <p id="progress-text">0%</p>
+  <div id="download-actions"></div>
+  <p id="job-error" class="error" hidden></p>
+  <a href="/" class="btn-secondary">새 작업</a>
+</section>
+<script>
+  window.PDF_SECURE_JOB_ID = "{{ job_id }}";
+</script>
+<script src="/static/job.js?v=2"></script>
+{% endblock %}

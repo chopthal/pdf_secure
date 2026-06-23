@@ -1,157 +1,14 @@
-import io
 import os
 import platform
-from pathlib import Path
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import inch
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
-from pypdf import PdfReader, PdfWriter
+import sys
+import threading
 
-def get_korean_font():
-    """
-    운영체제에 따라 한글 폰트를 자동으로 찾아서 등록합니다.
-    Windows: 맑은고딕
-    macOS: 애플고딕 또는 나눔고딕
-    """
-    system = platform.system()
-    font_name = None
-    font_path = None
-    
-    if system == 'Windows':
-        # Windows: 맑은고딕
-        possible_paths = [
-            'C:/Windows/Fonts/malgun.ttf',
-            'C:/Windows/Fonts/gulim.ttc',
-        ]
-        for path in possible_paths:
-            if os.path.exists(path):
-                font_path = path
-                font_name = 'Malgun' if 'malgun' in path.lower() else 'Gulim'
-                break
-    elif system == 'Darwin':  # macOS
-        # macOS: 애플고딕 또는 나눔고딕
-        possible_paths = [
-            '/System/Library/Fonts/AppleGothic.ttf',
-            '/System/Library/Fonts/Supplemental/AppleGothic.ttf',
-            '/Library/Fonts/NanumGothic.ttf',
-            os.path.expanduser('~/Library/Fonts/NanumGothic.ttf'),
-        ]
-        for path in possible_paths:
-            if os.path.exists(path):
-                font_path = path
-                font_name = 'AppleGothic' if 'Apple' in path else 'NanumGothic'
-                break
-    
-    # 폰트 등록 시도
-    if font_path and font_name:
-        try:
-            pdfmetrics.registerFont(TTFont(font_name, font_path))
-            return font_name
-        except Exception as e:
-            print(f"폰트 등록 실패 ({font_path}): {e}")
-    
-    # 폰트를 찾지 못한 경우 기본 폰트 사용 (한글 깨짐 주의)
-    print("한글 폰트를 찾을 수 없습니다. 기본 폰트로 진행합니다. (한글이 깨질 수 있습니다)")
-    return 'Helvetica'
-
-def add_watermark(input_pdf, output_pdf, watermark_text, password=None, 
-                 buyer_name=None, buyer_phone=None, progress_callback=None):
-    # 1. 한글 폰트 등록 (크로스 플랫폼 지원)
-    font_name = get_korean_font()
-
-    # 2. 워터마크 레이어 생성
-    packet = io.BytesIO()
-    can = canvas.Canvas(packet, pagesize=A4)
-    can.setFont(font_name, 10) # 폰트 크기 (하단 표기용으로 작게 조정)
-    can.setFillColorRGB(0.5, 0.5, 0.5) # 밝은 회색
-    can.setFillAlpha(0.6) # 투명도 60% (0.6)
-    
-    # 워터마크 위치 (왼쪽 하단)
-    width, height = A4
-    font_size = 10
-    can.drawString(30, 30 + font_size * 1.5, watermark_text) # 왼쪽 하단에 배치 (글자 크기 1.5배만큼 위로)
-    
-    can.save()
-    packet.seek(0)
-    
-    # 3. 원본 PDF와 워터마크 합치기
-    new_pdf = PdfReader(packet)
-    existing_pdf = PdfReader(input_pdf)
-    output = PdfWriter()
-    
-    total_pages = len(existing_pdf.pages)
-    if progress_callback:
-        progress_callback(0, total_pages, "PDF 읽기 완료")
-
-    # 5번째 페이지(인덱스 4)부터 워터마크 적용
-    for i in range(total_pages):
-        page = existing_pdf.pages[i]
-        if i >= 4:  # 5번째 페이지부터 (인덱스는 0부터 시작)
-            page.merge_page(new_pdf.pages[0])
-        output.add_page(page)
-        
-        if progress_callback:
-            progress_callback(i + 1, total_pages, f"페이지 처리 중: {i + 1}/{total_pages}")
-
-    # 4. 메타데이터 설정 (구매자 정보 추가)
-    if buyer_name or buyer_phone:
-        if progress_callback:
-            progress_callback(total_pages, total_pages, "메타데이터 설정 중...")
-        
-        # 기존 메타데이터 읽기
-        metadata = {}
-        if hasattr(existing_pdf, 'metadata') and existing_pdf.metadata:
-            metadata = existing_pdf.metadata.copy()
-        
-        # 구매자 정보로 메타데이터 업데이트
-        metadata.update({
-            '/Author': '올라',
-            '/Subject': f'구매자 정보: {buyer_name or ""} ({buyer_phone or ""})',
-            '/Creator': '올라의 꿀수면 프로젝트',
-            '/Producer': '',
-        })
-        
-        output.add_metadata(metadata)
-    
-    # 5. 비밀번호 및 권한 설정 (제공된 경우)
-    if password:
-        if progress_callback:
-            progress_callback(total_pages, total_pages, "비밀번호 및 권한 설정 중...")
-        
-        # pypdf의 encrypt 메서드는 기본적으로 비밀번호만 받음
-        # 권한 설정을 위해서는 암호화 후 권한을 직접 설정해야 함
-        # 하지만 pypdf의 최신 버전에서는 권한 설정이 제한적임
-        
-        # 기본 암호화 적용
-        output.encrypt(
-            user_password=password,
-            owner_password=password,
-            use_128bit=True
-        )
-        
-        # 참고: pypdf에서는 권한(복사/인쇄 제한) 설정이 제한적입니다.
-        # 완전한 권한 제어를 위해서는 PyPDF2 라이브러리 사용이 필요할 수 있습니다.
-        # 현재는 비밀번호 보호만 적용되며, 권한 설정은 PDF 뷰어에 따라 다르게 동작할 수 있습니다.
-    
-    # 5. 파일 저장
-    if progress_callback:
-        progress_callback(total_pages, total_pages, "파일 저장 중...")
-    with open(output_pdf, "wb") as outputStream:
-        output.write(outputStream)
-    
-    if progress_callback:
-        progress_callback(total_pages, total_pages, "완료!")
-    
-    return True
+from core.password import PdfPasswordValidationError, validate_pdf_password
+from core.watermark import add_watermark
 
 # --- GUI 인터페이스 ---
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
-import threading
-import sys
-import os
 
 # macOS에서 발생하는 시스템 경고 메시지 억제
 if platform.system() == 'Darwin':  # macOS
@@ -363,6 +220,11 @@ class PDFSecureGUI:
             return False
         if not self.pdf_password.get().strip():
             messagebox.showerror("오류", "비밀번호를 입력해주세요.")
+            return False
+        try:
+            validate_pdf_password(self.pdf_password.get())
+        except PdfPasswordValidationError as exc:
+            messagebox.showerror("오류", str(exc))
             return False
         return True
     
